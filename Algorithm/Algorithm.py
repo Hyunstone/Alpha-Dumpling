@@ -34,3 +34,17 @@ def Greedy():
     for name in greedDict:
         if (greedDict[name] == result): 
             return name
+        
+# 기능: DP테이블에서 업데이트를 해야할 인덱스의 순서를 모두 업데이트한다
+# 입력: 업데이트 해야할 인덱스
+def updateDP(index):
+    weightDP[botSelect].append(-1)
+    # 시너지 재료들 전부를 순회합니다
+    for name in Synergy.getSynergyList():
+        # -1이 있으면 스킵
+        if (-1 in weightDP[name]): continue
+        sum = 0
+        # 로봇이 선택한 명단과 선택할 재료를 연산
+        for i in botChoiceList:
+            sum += Synergy[name].value[i]
+        weightDP[name].append(weightDP[botSelect][index - 1] + sum)
