@@ -12,15 +12,17 @@ class Synergy(Enum):
 
 userSelectCount = 4
 ingredientNumber = 5
-weightDP = {}
-
-botChoiceList = []
 botSelect = "APPLE"
+weightDP = {}
+botChoiceList = []
+
 weightDP[botSelect] = [-1]
 weightDP['COCAINE'] = [Synergy[botSelect].value['COCAINE']]
 weightDP['BANANA'] = [Synergy[botSelect].value['BANANA']]
 weightDP['COKE'] = [Synergy[botSelect].value['COKE']]
 weightDP['GUN'] = [Synergy[botSelect].value['GUN']]
+botChoiceList.append(botSelect)
+idx = 0
 
 # 기능: 선택한 식재료를 기반으로 가장 큰 시너지 값을 가진 식재료를 리턴한다
 # 출력: 가장 큰 시너지 값을 가진 식재료
@@ -48,3 +50,11 @@ def updateDP(index):
         for i in botChoiceList:
             sum += Synergy[name].value[i]
         weightDP[name].append(weightDP[botSelect][index - 1] + sum)
+
+while (idx < userSelectCount - 1):
+    botSelect = Greedy()
+    botChoiceList.append(botSelect)
+    updateDP(idx)
+    idx += 1
+    print(weightDP)
+print(botChoiceList)
