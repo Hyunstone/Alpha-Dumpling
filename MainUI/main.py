@@ -3,7 +3,7 @@ import time
 
 screen_width = 1200
 screen_heiht = 800
-startImg = pygame.image.load("C:/Users/hyun1/Desktop/algo_team/src/image/clickedStartIcon.png")
+startImg = pygame.image.load("C:/Users/leehyunseok/Desktop/algo_team/Alpha-Dumpling/src/image/clickedStartIcon.png")
 screen = pygame.display.set_mode((screen_width, screen_heiht))
 
 class Game:
