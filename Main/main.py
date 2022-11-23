@@ -7,6 +7,10 @@ sys.path.append('')
 from Algorithm.Synergy import Synergy
 from Algorithm.algorithm import *
 
+# 유저의 재료 선택 개수
+#global userSelectCount
+userSelectCount = 0
+
 # 일반 버튼 클래스
 class Button():
     
@@ -132,12 +136,12 @@ class ingredient_button():
             'pressed': '#333333',
         }
         
+        # 이 변수는 DP테이블 만들때 사용하는 변수입니다
         index = 0
+        # 전역 변수를 클래스나 메소드에서 변경하려면 global로 내부에서 선언을 해야 한다네요
+        global userSelectCount
         
-        
-
         # 해당 재료를 user 또는 robot이 이미 선택했을 때
-        
         if (buttonIndex in total_ingredient):
 
             # 버튼 색 변경
@@ -158,7 +162,7 @@ class ingredient_button():
 
                 # (2) 마우스가 버튼 안에서 클릭되었을 때
                 if click[0]:
-
+                
                     # 버튼 색 변경
                     self.buttonSurface.fill(self.fillColors['pressed'])
                     screen.blit(self.buttonSurf, (self.x + 40, self.y + 10))
@@ -166,25 +170,29 @@ class ingredient_button():
                     # user가 선택한 재료를 리스트에 추가
                     ingredient_user.append(buttonIndex)
                     total_ingredient.append(buttonIndex)
-                        
+                    # 
+                    userSelectCount += 1
+                            
                     # 유저가 처음 선택했을때 시너지DP를 만듭니다
                     if (len(ingredient_user) == 1):
                         firstSynergyList = Synergy.getSynergyList()
                         firstSynergyList.remove(buttonIndex)
                         botRandomChoice = random.choice(firstSynergyList)
                         initSynergy(botRandomChoice, ingredient_robot)
+                        weightDP[buttonIndex].append(-1)
                         print(botRandomChoice)
                     else:
                         botSelect = Greedy()
                         ingredient_robot.append(botSelect)
                         total_ingredient.append(botSelect)
-                        updateDP(index, botSelect, total_ingredient)
+                        updateDP(index, botSelect, ingredient_robot)
+                        
                     print(ingredient_user)
                     print(ingredient_robot)
-                            
-                   
+                                
+                    print(userSelectCount)
                     time.sleep(0.2)
-                    
+                        
             # (3) 마우스가 버튼 안에 있지 않을 때      
             else:
 
@@ -229,10 +237,7 @@ ingredient_robot = []
 global total_ingredient 
 total_ingredient = []
 
-# 유저의 재료 선택 개수
-global userSelectCount
-userSelectCount = 0
-
+global maxSelectCount 
 maxSelectCount = 4
 
 #--------------------------
@@ -258,7 +263,6 @@ ajussi = pygame.transform.scale(ajussi, (ajussi_width * 0.9, ajussi_height * 0.9
 # 캐릭터 x, y 좌표 설정
 ajussi_x_pos = (screen_width / 2) + 100
 ajussi_y_pos = screen_height - ajussi_height + 100
-
 
 
 # [2] 로봇 캐릭터 로딩
@@ -322,6 +326,8 @@ def game():
     
     running_game = True
     while running_game:
+        #userSelectCount = 0
+        
         for event in pygame.event.get():
 
             # 창을 닫는 이벤트가 발생하였을 때
@@ -331,6 +337,8 @@ def game():
         if userSelectCount == maxSelectCount:
             userScore = sumSynergy(ingredient_user)
             botScore = sumSynergy(ingredient_robot)
+            print(userScore)
+            print(botScore)
             if (userScore >  botScore):
                 win()
             lose()
@@ -436,7 +444,7 @@ def intro():
         intro_image = pygame.image.load(intro_image)
         screen.blit(intro_image, (280, 150))
         pygame.display.flip()
-        time.sleep(0.5)
+        time.sleep(0.2)
     menu()
 
 #------------------
@@ -444,26 +452,34 @@ def intro():
 #------------------
 
 # 인트로 사진
-win_images = ["image/win.jpg", "image/win2.jpg"]
+win_images = ["image/win.png", "image/win2.png"]
 
 def win():
     for win_image in win_images:
+        win_image = pygame.image.load(win_image)
         screen.blit(win_image, (0,0))
         pygame.display.flip()
-        time.sleep(5)
+        time.sleep(0.5)
+    # 시간 갖고 강제로 종료 시켰습니다
+    time.sleep(0.5)
+    exit()
 
 #------------------
 # 패배 화면 로딩
 #------------------
 
 # 인트로 사진
-lose_images = ["image/lose.jpg", "image/lose2.jpg"]
+lose_images = ["image/lose.png", "image/lose2.png"]
 
 def lose():
     for lose_image in lose_images:
+        lose_image = pygame.image.load(lose_image)
         screen.blit(lose_image, (0,0))
         pygame.display.flip()
-        time.sleep(0.2)
+        time.sleep(0.5)
+    # 시간 갖고 강제로 종료 시켰습니다
+    time.sleep(0.5)
+    exit()
 
 
 

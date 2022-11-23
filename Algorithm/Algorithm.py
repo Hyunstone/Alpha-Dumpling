@@ -1,7 +1,7 @@
 from Algorithm.Synergy.Synergy import *
+# 아랫줄은 이 파일만을 테스트 할때 사용하는 줄이니 지우셔도 됩니다
 #from Synergy.Synergy import *
 
-#userSelectCount = 4
 weightDP = {}
 botChoiceList = [] # ingredient_robot
 
@@ -46,9 +46,6 @@ def updateDP(index, botSelect, botList):
             sum += Synergy[name].value[i]
         weightDP[name].append(weightDP[botSelect][index - 1] + sum)
         
-temp_list = ['SESAME_OIL', 'KOCHUJANG', 'MAYONNAISE']
-#Synergy["SESAME_OIL"]
-
 def sumSynergy(list):
     sum = 0
     for standard in list:
@@ -60,5 +57,3 @@ def sumSynergy(list):
             sum += Synergy[standard].value[obj]
     sum = (int)(sum / 2)
     return sum
-
-print(sumSynergy(temp_list))
