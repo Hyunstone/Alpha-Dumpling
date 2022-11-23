@@ -1,13 +1,18 @@
 import pygame
 import time
 import threading
+import random
+import sys
+sys.path.append('')
+from Algorithm.Synergy import Synergy
+from Algorithm.algorithm import *
 
 # 일반 버튼 클래스
 class Button():
     
     # 인자로 받는 값:
     # 버튼 x, y 좌표 | 버튼 길이, 너비 | 텍스트 x, y 좌표 | 텍스트 | 클릭 시 실행할 함수 | 버튼 이미지 
-    def __init__(self, x, y, width, height, text_x, text_y, buttonText='Button', onclickFunction=None, onePress=False, buttonImage = None):
+    def __init__(self, x, y, width, height, text_x, text_y, buttonText = 'Button', onclickFunction = None, onePress = False, buttonImage = None):
         
         # 버튼 x, y좌표
         self.x = x
@@ -29,7 +34,7 @@ class Button():
         self.mouse = pygame.mouse.get_pos()
 
         # 클릭 여부
-        click = pygame
+        # click = pygame
         click = pygame.mouse.get_pressed()
 
         # 버튼 
@@ -90,7 +95,7 @@ class ingredient_button():
 
     # 인자로 받는 값:
     # 버튼 x, y 좌표 | 버튼의 길이, 너비 | 재료 번호 
-    def __init__(self, x, y, width, height, buttonIndex=0, onePress=False):
+    def __init__(self, x, y, width, height, buttonIndex = 0, onePress = False):
 
         # 버튼 x, y 좌표
         self.x = x
@@ -126,13 +131,17 @@ class ingredient_button():
             'hover': '#666666',
             'pressed': '#333333',
         }
-
+        
+        index = 0
+        
+        
 
         # 해당 재료를 user 또는 robot이 이미 선택했을 때
-        if (buttonIndex in ingredient_user) or (buttonIndex in ingredient_robot):
+        
+        if (buttonIndex in total_ingredient):
 
             # 버튼 색 변경
-            self.buttonSurface.fill((0,0,0))
+            self.buttonSurface.fill((0, 0, 0))
             screen.blit(self.buttonSurface, (x, y))
             screen.blit(self.buttonSurf, (self.x + 15, self.y + 10))
 
@@ -154,9 +163,26 @@ class ingredient_button():
                     self.buttonSurface.fill(self.fillColors['pressed'])
                     screen.blit(self.buttonSurf, (self.x + 40, self.y + 10))
                     
-                    # user가 선택한 재료 리스트인 ingredient_user에 해당 재료 추가
+                    # user가 선택한 재료를 리스트에 추가
                     ingredient_user.append(buttonIndex)
+                    total_ingredient.append(buttonIndex)
+                        
+                    # 유저가 처음 선택했을때 시너지DP를 만듭니다
+                    if (len(ingredient_user) == 1):
+                        firstSynergyList = Synergy.getSynergyList()
+                        firstSynergyList.remove(buttonIndex)
+                        botRandomChoice = random.choice(firstSynergyList)
+                        initSynergy(botRandomChoice, ingredient_robot)
+                        print(botRandomChoice)
+                    else:
+                        botSelect = Greedy()
+                        ingredient_robot.append(botSelect)
+                        total_ingredient.append(botSelect)
+                        updateDP(index, botSelect, total_ingredient)
                     print(ingredient_user)
+                    print(ingredient_robot)
+                            
+                   
                     time.sleep(0.2)
                     
             # (3) 마우스가 버튼 안에 있지 않을 때      
@@ -199,6 +225,15 @@ ingredient_user = []
 global ingredient_robot
 ingredient_robot = []
 
+# 봇의 선택 제약을 위한 리스트
+global total_ingredient 
+total_ingredient = []
+
+# 유저의 재료 선택 개수
+global userSelectCount
+userSelectCount = 0
+
+maxSelectCount = 4
 
 #--------------------------
 # 캐릭터 로딩 및 세팅
@@ -241,6 +276,7 @@ robot = pygame.transform.scale(robot, (robot_width * 1, robot_height * 1))
 # 캐릭터 x, y 좌표 설정
 robot_x_pos = 0
 robot_y_pos = screen_height - robot_height
+
 
 global running_menu
 global running_info
@@ -291,6 +327,13 @@ def game():
             # 창을 닫는 이벤트가 발생하였을 때
             if event.type == pygame.QUIT:
                 running_menu = False # 종료
+                
+        if userSelectCount == maxSelectCount:
+            userScore = sumSynergy(ingredient_user)
+            botScore = sumSynergy(ingredient_robot)
+            if (userScore >  botScore):
+                win()
+            lose()
 
         # 화면 설정
         screen.fill((0,0,0)) # 배경화면 칠하기
@@ -301,18 +344,18 @@ def game():
         Button(475, 0, 50, 50, 0, 0, onclickFunction=menu, buttonImage = home_button) # 홈버튼 로
 
         # 재료 버튼 로드 (1번-5번)
-        ingredient_button(83, ingredient_line1_y_pos, 100, 70, 1)
-        ingredient_button(266, ingredient_line1_y_pos, 100, 70, 2)
-        ingredient_button(449, ingredient_line1_y_pos, 100, 70, 3)
-        ingredient_button(632, ingredient_line1_y_pos, 100, 70, 4)
-        ingredient_button(815, ingredient_line1_y_pos, 100, 70, 5)
+        ingredient_button(83, ingredient_line1_y_pos, 100, 70, "MINT_CHOCOLATE")
+        ingredient_button(266, ingredient_line1_y_pos, 100, 70, "SESAME_OIL")
+        ingredient_button(449, ingredient_line1_y_pos, 100, 70, "KOCHUJANG")
+        ingredient_button(632, ingredient_line1_y_pos, 100, 70, "MAYONNAISE")
+        ingredient_button(815, ingredient_line1_y_pos, 100, 70, "SOJU")
 
         # 재료 버튼 로드 (6번-10번)
-        ingredient_button(83, ingredient_line2_y_pos, 100, 70, 6)
-        ingredient_button(266, ingredient_line2_y_pos, 100, 70, 7)
-        ingredient_button(449, ingredient_line2_y_pos, 100, 70, 8)
-        ingredient_button(632, ingredient_line2_y_pos, 100, 70, 9)
-        ingredient_button(815, ingredient_line2_y_pos, 100, 70, 10)
+        ingredient_button(83, ingredient_line2_y_pos, 100, 70, "CHEESE")
+        ingredient_button(266, ingredient_line2_y_pos, 100, 70, "GALIC")
+        ingredient_button(449, ingredient_line2_y_pos, 100, 70, "ONION")
+        ingredient_button(632, ingredient_line2_y_pos, 100, 70, "JUICE")
+        ingredient_button(815, ingredient_line2_y_pos, 100, 70, "WATER")
 
         # 화면 업데이트
         pygame.display.flip()
@@ -343,7 +386,7 @@ def info():
         screen.blit(background, (0,0)) # 배경 화면 이미지 로드
         screen.blit(text, (300,0)) # 타이틀 로드
         pygame.draw.rect(screen, (0, 0, 0), [250, 50, 500, 500], 400) # 사각형 로드
-        Button(250, 50, 50, 50, 0, 0, onclickFunction=menu, buttonImage = home_button)
+        Button(250, 50, 50, 50, 0, 0, onclickFunction = menu, buttonImage = home_button)
         
         # 화면 업데이트
         pygame.display.flip()
@@ -368,12 +411,12 @@ def menu():
                 running_menu = False # 종료
 
         # 화면 설정
-        screen.fill((0,0,0)) # 배경 화면 칠하기
-        screen.blit(background, (0,0)) # 배경 화면 이미지 로드
+        screen.fill((0, 0, 0)) # 배경 화면 칠하기
+        screen.blit(background, (0, 0)) # 배경 화면 이미지 로드
         screen.blit(ajussi, (ajussi_x_pos, ajussi_y_pos)) # user(아저씨) 캐릭터 로드
         screen.blit(robot, (robot_x_pos, robot_y_pos)) # robot 캐릭터 로드
         Button(300, 200, 400, 100, 410, 230, 'Game Start', onclickFunction = loading) # 시작 버튼 로드
-        Button(300, 350, 400, 100, 365, 380, 'Game Information', onclickFunction =info) # 설명 버튼 로드
+        Button(300, 350, 400, 100, 365, 380, 'Game Information', onclickFunction = info) # 설명 버튼 로드
         screen.blit(text, (300,0)) # 타이틀 로드
 
         # 화면 업데이트
