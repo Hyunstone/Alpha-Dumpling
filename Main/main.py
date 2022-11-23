@@ -142,6 +142,8 @@ class ingredient_button():
         global userSelectCount
         
         # 해당 재료를 user 또는 robot이 이미 선택했을 때
+        # 식재료를 전부 담는 리스트를 따로 만들었습니다.
+        # 버튼 클릭후 자동으로 바로 다른 버튼을 색칠부분이 어색하긴 합니다.
         if (buttonIndex in total_ingredient):
 
             # 버튼 색 변경
@@ -170,7 +172,8 @@ class ingredient_button():
                     # user가 선택한 재료를 리스트에 추가
                     ingredient_user.append(buttonIndex)
                     total_ingredient.append(buttonIndex)
-                    # 
+                    
+                    # 유저가 재료를 선택시 카운트가 증가합니다
                     userSelectCount += 1
                             
                     # 유저가 처음 선택했을때 시너지DP를 만듭니다
@@ -181,7 +184,10 @@ class ingredient_button():
                         initSynergy(botRandomChoice, ingredient_robot)
                         weightDP[buttonIndex].append(-1)
                         print(botRandomChoice)
+                    # 처음 이후에는 유저가 선택시 봇이 그리디하게 선택을 하고 리스트에 추가를하고
+                    # DP테이블을 업데이트합니다
                     else:
+                        weightDP[buttonIndex].append(-1)
                         botSelect = Greedy()
                         ingredient_robot.append(botSelect)
                         total_ingredient.append(botSelect)
